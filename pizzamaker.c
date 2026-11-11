@@ -9,15 +9,15 @@ void* pizzamaker_subroutine(void* data) {
     if (!data)
         return NULL;
 
-	Monitor* mon = (Monitor*)data;
-	while (true) {
-		size_t plate_n = 0;
-	    if (pizzamaker_find_plate(mon, &plate_n))
+    Monitor* mon = (Monitor*)data;
+    while (true) {
+        size_t plate_n = 0;
+        if (pizzamaker_find_plate(mon, &plate_n))
             return NULL;
 
         pizzamaker_work(mon, plate_n);
-	}
-	return NULL;
+    }
+    return NULL;
 }
 
 static bool pizzamaker_find_plate(Monitor* mon, size_t* plate_n) {

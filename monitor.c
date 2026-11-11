@@ -7,8 +7,8 @@ void monitor_init(Monitor* mon) {
 
     *mon = (Monitor){0};
     pthread_mutex_init(&mon->m, NULL);
-    pthread_cond_init(&mon->c_chef, NULL);
-    pthread_cond_init(&mon->c_del, NULL);
+    pthread_cond_init(&mon->c_pizzamaker, NULL);
+    pthread_cond_init(&mon->c_courier, NULL);
 	for (size_t i = 0; i < PLATE_COUNT; i++)
 		strcpy(mon->plates[i].contents, EMPTY_PIZZA);
 }
@@ -72,7 +72,6 @@ bool monitor_advance_pizza_stage(Monitor* mon, size_t i,
         strncpy(mon->plates[i].contents, 
                 next_stage, PIZZA_CHAR_COUNT - 1);
         success = true;
-        //printf("повар добавил тесто на пиццу номер %d\n", place);
     }
     pthread_mutex_unlock(&mon->m);
     return success;
