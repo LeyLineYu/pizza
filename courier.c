@@ -1,4 +1,7 @@
 #include "courier.h"
+#include "monitor.h"
+#include <stdio.h>
+#include <string.h>
 
 void* courier_subroutine(void* data) {
     if (!data)

@@ -8,8 +8,8 @@ static void pizzamaker_work(Monitor* mon, size_t plate_n);
 void* pizzamaker_subroutine(void* data) {
     if (!data)
         return NULL;
-	Monitor* mon = (Monitor*)data;
 
+	Monitor* mon = (Monitor*)data;
 	while (true) {
 		size_t plate_n = 0;
 	    if (pizzamaker_find_plate(mon, &plate_n))
@@ -35,7 +35,7 @@ static bool pizzamaker_find_plate(Monitor* mon, size_t* plate_n) {
                 return false;
             }
         }
-        pthread_cond_wait(&mon->c_chef, &mon->m);
+        pthread_cond_wait(&mon->c_pizzamaker, &mon->m);
     }
 
     // should be unreachable
