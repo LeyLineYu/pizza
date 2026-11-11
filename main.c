@@ -1,51 +1,37 @@
 #include <stdio.h>
-#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+#include "monitor.h"
+#include "pizzamaker.h"
+#include "courier.h"
 
-void* subroutine(void* data);
+void spawn_threads(Monitor* mon);
 
-#define COUNT     10000000
-#define N_THREADS 10
+int main(){
+	Monitor mon;
+    monitor_init(&mon);
 
-typedef struct {
-    pthread_mutex_t m;
-    unsigned count;
-    pthread_cond_t c1;
-} Monitor;
-
-void monitor_increase_count(Monitor* mon);
-
-int main(void) {
-    printf("Hello, World\n");
-
-    Monitor mon = {0};
-    pthread_mutex_init(&mon.m, NULL);
-    pthread_cond_init(&mon.c1, NULL);
-
-    pthread_t threads[N_THREADS] = {0};
-    for (size_t i = 0; i < N_THREADS; i++) {
-        pthread_create(&threads[i], NULL, &subroutine, &mon);
-    }
-    for (size_t i = 0; i < N_THREADS; i++) {
-        pthread_join(threads[i], NULL);
-    }
-
-    printf("Total:    %d\n"
-           "Expected: %d\n",
-           mon.count,
-           N_THREADS * COUNT);
-    return 0;
+    spawn_threads(&mon);
+    // monitor technically needs mutex and cond destructors, 
+    // but man says they have virtually no effect
+	return 0;
 }
 
-void* subroutine(void* data) {
-    Monitor* mon = (Monitor*)data;
-    for (size_t i = 0; i < COUNT; i++) {
-        monitor_increase_count(mon);
-    }
-    return NULL;
-}
+void spawn_threads(Monitor* mon) {
+    if (!mon)
+        return;
 
-void monitor_increase_count(Monitor* mon) {
-        pthread_mutex_lock(&mon->m);
-        (mon->count)++;
-        pthread_mutex_unlock(&mon->m);
+    pthread_attr_t attrs = {0};
+    pthread_attr_init(&attrs);
+    pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
+
+    pthread_t pizzamakers[PIZZAMAKER_COUNT] = {0};
+    for (size_t i = 0; i < PIZZAMAKER_COUNT; i++)
+        pthread_create(&pizzamakers[i], &attrs, &pizzamaker_subroutine, &mon);
+
+    pthread_t couriers[COURIER_COUNT] = {0};
+    for (size_t i = 0; i < COURIER_COUNT; i++)
+        pthread_create(&couriers[i], &attrs, &courier_subroutine, &mon);
+
+    pthread_attr_destroy(&attrs); 
 }
